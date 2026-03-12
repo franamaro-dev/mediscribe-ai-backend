@@ -1,0 +1,76 @@
+"""
+MediScribe AI — Application Entry Point.
+
+FastAPI application factory with lifecycle management.
+"""
+
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes import router
+from app.core.config import get_settings
+from app.core.database import init_db
+
+# ── Logging ──────────────────────────────────────────────────
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+
+# ── Lifespan ─────────────────────────────────────────────────
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup / shutdown lifecycle."""
+    logger.info("🚀 Iniciando MediScribe AI...")
+    await init_db()
+    logger.info("✅ Base de datos inicializada.")
+    yield
+    logger.info("👋 MediScribe AI detenido.")
+
+
+# ── App Factory ──────────────────────────────────────────────
+
+settings = get_settings()
+
+app = FastAPI(
+    title=settings.APP_TITLE,
+    description=settings.APP_DESCRIPTION,
+    version=settings.APP_VERSION,
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# ── CORS Middleware ──────────────────────────────────────────
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ── Register Routes ──────────────────────────────────────────
+
+app.include_router(router)
+
+
+# ── Root Redirect ────────────────────────────────────────────
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """Redirect root to API docs."""
+    from fastapi.responses import RedirectResponse
+
+    return RedirectResponse(url="/docs")
