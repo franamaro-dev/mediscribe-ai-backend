@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     # ── App ──────────────────────────────────────────────────
     DEBUG: bool = True
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
     APP_TITLE: str = "MediScribe AI"
     APP_VERSION: str = "0.1.0"
     APP_DESCRIPTION: str = (

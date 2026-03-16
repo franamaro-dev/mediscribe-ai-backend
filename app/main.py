@@ -50,15 +50,31 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# ── CORS Middleware ──────────────────────────────────────────
+# ── CORS Middleware (Hardened) ──────────────────────────────
+
+# [SOC-NOTE]: Restricting origins to prevent unauthorized Cross-Origin requests.
+# In production, this should be a list of trusted domains.
+ALLOWED_ORIGINS = settings.ALLOWED_ORIGINS.split(",") if hasattr(settings, "ALLOWED_ORIGINS") else ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],  # [SOC-NOTE]: Only allowing necessary methods.
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+# ── Security Headers Middleware ──────────────────────────────
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    return response
 
 # ── Register Routes ──────────────────────────────────────────
 
