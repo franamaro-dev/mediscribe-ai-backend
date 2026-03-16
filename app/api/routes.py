@@ -53,9 +53,10 @@ async def health_check() -> HealthResponse:
     ),
 )
 async def upload_audio(
-    data: ReportCreate,
+    data: ReportCreate,  # [SOC NOTE]: Data is automatically validated against Pydantic schema here.
     db: AsyncSession = Depends(get_db),
 ) -> ReportResponse:
+    # [SOC NOTE]: Audit log should be triggered here in production for traceability.
     report = await report_service.create_report(data, db)
     return ReportResponse.model_validate(report)
 

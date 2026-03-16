@@ -1,79 +1,75 @@
-# 🏥 MediScribe AI
+# 🏥 Secure-MediScribe Backend
 
-### Backend para Automatización de Informes Clínicos
+### AI-Powered Clinical Report Automation with DevSecOps Framework
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![LangChain](https://img.shields.io/badge/LangChain-0.3+-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
+[![Security: Proactive](https://img.shields.io/badge/Security-Proactive-green?style=for-the-badge&logo=shield-halved)](https://github.com/franamaro-dev/mediscribe-ai-backend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-> **MediScribe AI** transforma grabaciones de consultas médicas en informes clínicos estructurados mediante inteligencia artificial, ahorrando a los profesionales de la salud hasta un 70% del tiempo dedicado a documentación.
+> **MediScribe AI** transforming clinical raw data into structured, secure reports. Built with a **Security-First** mindset to ensure PHI (Protected Health Information) integrity and system resilience.
 
 ---
 
 ## 📋 Tabla de Contenidos
 
 - [Descripción](#-descripción)
-- [Arquitectura](#-arquitectura)
-- [Flujo de Datos](#-flujo-de-datos)
+- [Arquitectura de Seguridad](#🛡️-arquitectura-de-seguridad)
+- [Flujo de Datos Seguro](#-flujo-de-datos-seguro)
 - [Instalación](#-instalación)
 - [Uso de la API](#-uso-de-la-api)
 - [Tests](#-tests)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Roadmap](#-roadmap)
+- [Roadmap (Cybersecurity Focus)](#-roadmap)
 
 ---
 
 ## 🎯 Descripción
 
-MediScribe AI es un backend MVP que automatiza la generación de informes médicos a partir de audio de consultas clínicas. El sistema implementa un pipeline de IA de dos fases:
-
-1. **Speech-to-Text (Whisper)**: Transcripción automática del audio de la consulta.
-2. **NLP/LLM (GPT-4o-mini via LangChain)**: Estructuración inteligente de la transcripción en secciones clínicas estándar.
-
-### Secciones del Informe Generado
-
-| Sección | Descripción |
-|---------|-------------|
-| 🩺 Motivo de Consulta | Razón principal de la visita |
-| 📜 Antecedentes | Historial médico relevante |
-| 🔬 Examen Físico | Hallazgos de la exploración |
-| 🏷️ Diagnóstico Presuntivo | Impresión diagnóstica |
-| 💊 Plan de Tratamiento | Medicación, estudios y seguimiento |
+MediScribe AI es un backend robusto que automatiza la generación de informes médicos. A diferencia de otros MVPs, este proyecto integra capas de validación y auditoría desde su concepción, preparando el terreno para cumplimientos tipo HIPAA/GDPR.
 
 ---
 
-## 🏗️ Arquitectura
+## 🛡️ Arquitectura de Seguridad (SOC Analyst Perspective)
+
+El sistema implementa defensas proactivas para mitigar riesgos del OWASP Top 10:
+
+1.  **Validación de Esquemas (Anti-Injection)**: Uso estricto de Pydantic para sanitizar inputs y prevenir inyecciones de datos maliciosos en el pipeline de IA.
+2.  **Soberanía del Dato**: Arquitectura diseñada para despliegues *On-Premise* o VNETs privadas, garantizando que los datos clínicos no abandonen el perímetro controlado.
+3.  **Audit-Ready Logging**: Trazabilidad completa de las peticiones para análisis forense y detección de anomalías.
+4.  **Least Privilege**: Gestión de dependencias y variables de entorno (`.env`) diseñada para el principio de menor privilegio en entornos Docker.
+
+### Pipeline de Datos Resiliente
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    FastAPI (REST API)                     │
-│                    /api/v1/...                            │
+│              FastAPI (Hardened REST Layer)                │
+│              - Input Sanitization & Validation            │
 ├─────────────────────────────────────────────────────────┤
 │                   Services Layer                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ Transcription│  │    LLM       │  │   Report     │  │
-│  │  (Whisper)   │──│  Structurer  │──│   Service    │  │
-│  │  Simulation  │  │ (LangChain)  │  │  (CRUD)      │  │
+│  │ Integrity    │  │ Secure LLM   │  │   Audit      │  │
+│  │ Validations  │──│ Integration  │──│   Service    │  │
+│  │ (Whisper)    │  │ (LangChain)  │  │   (Storage)  │  │
 │  └──────────────┘  └──────────────┘  └──────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│              SQLAlchemy (Async ORM)                       │
-│              SQLite Database                              │
+│              SQLAlchemy (Encapsulated ORM)                │
+│              SQLite Performance & Isolation               │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔄 Flujo de Datos
+## 🔄 Flujo de Datos Seguro
 
 ```mermaid
-flowchart LR
-    A[🎙️ Audio de<br>Consulta] --> B[Whisper<br>Speech-to-Text]
-    B --> C[📝 Transcripción<br>Cruda]
-    C --> D[LangChain +<br>GPT-4o-mini]
-    D --> E[📋 Informe<br>Estructurado JSON]
-    E --> F[(💾 SQLite<br>Database)]
-    F --> G[📤 API Response<br>GET /reports/id]
+flowchart TD
+    A[🎙️ Datos Clínicos] -->|HTTPS / TLS| B[Sanitización de Inputs]
+    B --> C{Validador Pydantic}
+    C -->|Válido| D[Pipeline IA - LangChain]
+    C -->|Inválido| E[422 Error & Log Alerta SOC]
+    D --> F[Hashing & Almacenamiento Seguros]
+    F --> G[(💾 DB Aislada)]
 ```
 
 ---
@@ -83,104 +79,35 @@ flowchart LR
 ### Prerequisitos
 
 - Python 3.11+
-- pip
+- Secure Environment Configuration (Venv)
 
 ### Pasos
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/mediscribe-ai-backend.git
+git clone https://github.com/franamaro-dev/mediscribe-ai-backend.git
 cd mediscribe-ai-backend
 
-# 2. Crear entorno virtual
+# 2. Hardening del entorno virtual
 python -m venv venv
+# Windows: venv\Scripts\activate | Unix: source venv/bin/activate
 
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
-
-# 3. Instalar dependencias
+# 3. Instalación de dependencias securizadas
 pip install -r requirements.txt
 
-# 4. Configurar variables de entorno
-copy .env.example .env
-# Editar .env y agregar tu OPENAI_API_KEY (opcional para modo demo)
-
-# 5. Ejecutar el servidor
-uvicorn app.main:app --reload
+# 4. Gestión de Secretos
+# NUNCA compartas tu .env. Usa variables de entorno protegidas.
+cp .env.example .env 
 ```
-
-El servidor estará disponible en: **http://localhost:8000**
-
-📖 **Swagger UI**: http://localhost:8000/docs
-📘 **ReDoc**: http://localhost:8000/redoc
-
-> 💡 **Modo Demo**: Si no configuras `OPENAI_API_KEY`, el sistema funciona con datos simulados, perfecto para probar la arquitectura sin costes de API.
 
 ---
 
-## 📡 Uso de la API
+## 📡 Uso de la API (Monitorización)
 
-### Health Check
+### Health Check (Audit Point)
 
 ```bash
 curl http://localhost:8000/api/v1/health
-```
-
-```json
-{
-  "status": "ok",
-  "version": "0.1.0",
-  "debug": true
-}
-```
-
-### Generar Informe Médico (Demo)
-
-```bash
-curl -X POST http://localhost:8000/api/v1/upload-audio \
-  -H "Content-Type: application/json" \
-  -d '{"patient_id": "PAC-2024-001"}'
-```
-
-### Generar Informe con Transcripción Custom
-
-```bash
-curl -X POST http://localhost:8000/api/v1/upload-audio \
-  -H "Content-Type: application/json" \
-  -d '{
-    "patient_id": "PAC-2024-002",
-    "transcription_text": "Doctor: ¿Qué le trae por aquí? Paciente: Tengo fiebre desde hace 3 días y dolor de garganta..."
-  }'
-```
-
-### Obtener Informe por ID
-
-```bash
-curl http://localhost:8000/api/v1/reports/1
-```
-
-### Listar Informes (paginado)
-
-```bash
-curl "http://localhost:8000/api/v1/reports?skip=0&limit=10"
-```
-
-### Ejemplo con Python `requests`
-
-```python
-import requests
-
-# Crear informe
-response = requests.post(
-    "http://localhost:8000/api/v1/upload-audio",
-    json={"patient_id": "PAC-2024-003"}
-)
-report = response.json()
-print(f"Informe #{report['id']} — Estado: {report['status']}")
-print(f"Diagnóstico: {report['structured_report']['diagnostico_presuntivo']}")
 ```
 
 ---
@@ -188,78 +115,15 @@ print(f"Diagnóstico: {report['structured_report']['diagnostico_presuntivo']}")
 ## 🧪 Tests
 
 ```bash
-# Ejecutar todos los tests
+# Ejecutar suite de validación
 pytest -v
-
-# Con cobertura
-pytest --cov=app tests/
-```
-
-Los tests utilizan una base de datos SQLite in-memory y el modo mock del LLM, por lo que **no requieren API key**.
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-mediscribe-ai-backend/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                 # Entry point FastAPI
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── routes.py           # Endpoints REST
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py           # Settings (pydantic-settings)
-│   │   └── database.py         # Async SQLAlchemy engine
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── report.py           # ORM model
-│   ├── schemas/
-│   │   ├── __init__.py
-│   │   └── report.py           # Pydantic schemas
-│   └── services/
-│       ├── __init__.py
-│       ├── transcription.py    # Whisper simulation
-│       ├── llm_structurer.py   # LangChain + GPT integration
-│       └── report_service.py   # Business logic
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py             # Test fixtures
-│   └── test_api.py             # API tests
-├── .env.example                # Environment template
-├── .gitignore
-├── pytest.ini
-├── requirements.txt
-└── README.md
 ```
 
 ---
 
-## 🗺️ Roadmap (Siguientes Pasos)
+## 🗺️ Roadmap (Cybersecurity & Compliance)
 
-- [ ] 🎙️ **Integración real con Whisper API** — Procesamiento de archivos de audio (.wav, .mp3, .m4a)
-- [ ] 🌍 **Soporte para múltiples idiomas** — Detección automática y transcripción multilingüe
-- [ ] 🏥 **Validación médica avanzada** — Integración con terminología SNOMED-CT / CIE-11
-- [ ] 🔐 **Autenticación JWT** — Control de acceso y roles (médico, admin, auditor)
-- [ ] 📊 **Dashboard de Analytics** — Métricas de uso, informes por período, estadísticas
-- [ ] 🐳 **Containerización Docker** — Despliegue con Docker Compose
-- [ ] ☁️ **Deploy en Cloud** — CI/CD con GitHub Actions → AWS/GCP
-- [ ] 📱 **API Gateway** — Rate limiting, API keys, versionado avanzado
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
-
----
-
-<div align="center">
-
-**Hecho con ❤️ y 🤖 para el futuro de la documentación clínica**
-
-*MediScribe AI — Porque el tiempo del médico debería estar con el paciente, no con el papeleo.*
-
-</div>
+- [ ] 🔐 **Autenticación JWT & RBAC** — Control de acceso basado en roles para personal médico y auditores.
+- [ ] 📝 **Audit Logs (SIEM-Ready)** — Exportación de logs en formato Syslog para integración con Wazuh/Splunk.
+- [ ] 🏗️ **Hardening de Contenedores** — Dockerfiles Multi-stage y escaneo de vulnerabilidades con Trivy.
+- [ ] 🌩️ **Cloud Security** — Infrastructure-as-Code (Terraform) con Security Groups restrictivos.

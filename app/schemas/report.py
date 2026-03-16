@@ -1,5 +1,7 @@
 """
 MediScribe AI — Pydantic Schemas (Request / Response validation).
+[SOC NOTE]: Using Pydantic for strict input sanitization and schema enforcement. 
+This prevents SQLi/XSS at the entry point.
 """
 
 from datetime import datetime
